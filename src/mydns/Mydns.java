@@ -8,6 +8,8 @@ package mydns;
 import java.io.*;
 import java.net.*;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
@@ -19,27 +21,69 @@ public class Mydns {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws SocketException{
+    public static void main(String[] args) throws SocketException, IOException{
         
         DatagramSocket datagramSocket = new DatagramSocket();
         String domainName = "cs.fiu.edu";
-        String rootAddress ="202.12.27.323";
-        InetAddress root = null;
-        try {
-            root = InetAddress.getByName(rootAddress);
-        } catch (UnknownHostException ex) {
-            System.out.println("Unknown Host");
-            Logger.getLogger(Mydns.class.getName()).log(Level.SEVERE, null, ex);
+        String DNS_SERVER = "198.41.0.4";
+        InetAddress root = InetAddress.getByName(DNS_SERVER);
+        byte[] sendBuffer = encodeUDP(domainName);
+        byte[] receiveBuffer = new byte [512];
+   
+        
+        
+        
+        
+        
+        DatagramPacket packet = new DatagramPacket(sendBuffer, sendBuffer.length, root, 53);
+        DatagramPacket receive = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+        datagramSocket.send(packet);
+        datagramSocket.receive(receive);
+        for(int i = 0; i < receive.getLength(); i++)
+            System.out.print(receive.getData()[i]+".");
+    /**
+     *
+     * @param domainAddress
+     * @return
+     */
+    }
+    public static byte[] encodeUDP(String domainAddress) throws IOException{
+        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+        DataOutputStream data = new DataOutputStream(byteOutputStream); 
+        String[] domain = domainAddress.split("\\.");
+        
+        data.writeByte(0);
+        data.writeByte(42);
+        data.writeByte(0);
+        data.writeByte(0);
+        data.writeByte(0);
+        data.writeByte(1);
+        data.writeByte(0);
+        data.writeByte(0);
+        data.writeByte(0);
+        data.writeByte(0);
+        data.writeByte(0);
+        data.writeByte(0);
+        for(int i = 0; i < domain.length; i++){
+            data.writeByte(domain[i].length());
+            data.writeBytes(domain[i]);
         }
-        byte[] doaminName = domainName.getBytes();
-        DatagramPacket packet = new DatagramPacket(doaminName, 0, root, 53);
+        data.writeByte(0);
+        data.writeByte(0);
+        data.writeByte(1);
+        data.writeByte(0);
+        data.writeByte(1);
         
-  
-        
+        return byteOutputStream.toByteArray();
+    }
+    ByteBuffer test;
+    public static byte[] decodeUDP(byte[] DNSMessage){
+        return null;
     }
     
-    public byte[] IPtoBytes(String IP){
-        
-    }
-    
+    public class DNSResponse{
+        private int AnswerCount;
+        private int AuthorityCount;
+        private int AdditianlCount;
+    } 
 }
