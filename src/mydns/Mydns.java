@@ -10,6 +10,7 @@ import java.net.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
@@ -22,25 +23,47 @@ public class Mydns {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws SocketException, IOException{
-        
         DatagramSocket datagramSocket = new DatagramSocket();
-        String domainName = "cs.fiu.edu";
-        String DNS_SERVER = "198.41.0.4";
-        InetAddress root = InetAddress.getByName(DNS_SERVER);
-        byte[] sendBuffer = encodeUDP(domainName);
-        byte[] receiveBuffer = new byte [512];
-   
-        
-        
-        
-        
-        
-        DatagramPacket packet = new DatagramPacket(sendBuffer, sendBuffer.length, root, 53);
-        DatagramPacket receive = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-        datagramSocket.send(packet);
-        datagramSocket.receive(receive);
-        for(int i = 0; i < receive.getLength(); i++)
-            System.out.print(receive.getData()[i]+".");
+        byte[] sendBuffer;
+        byte[] receiveBuffer;
+        DatagramPacket packet;
+        DatagramPacket receive = null;
+        boolean MyDns = false;
+        while(MyDns){
+            Scanner scanner = new Scanner(System.in);
+            String[] NSLookup = scanner.nextLine().split(" ");
+            if(NSLookup[0].equalsIgnoreCase("mydns"))
+                MyDns = true;
+            else
+                System.out.println("Unknown command. Enter a new command line.");
+        }
+        String domainName = "cs.fiu.edu";//NSLookup[1];
+        String dnsServer = "198.41.0.4";//NSLookup[2];
+        DNSResponse dnsResponse;
+        boolean found = false;
+        while(!found){
+            
+            InetAddress root = InetAddress.getByName(dnsServer);
+            sendBuffer = encodeUDP(domainName);
+            
+            System.out.println("----------------------------------------------------------------");
+            System.out.println("DNS server to query: " + dnsServer);
+            
+            receiveBuffer = new byte [512];
+            packet = new DatagramPacket(sendBuffer, sendBuffer.length, root, 53);
+            receive = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+            datagramSocket.send(packet);
+            datagramSocket.receive(receive);
+            dnsResponse = new DNSResponse(receive.getData());
+
+            
+            found = true;
+            if(dnsResponse.getAnswerCount() > 0)
+                found = true;
+        }
+
+       // for(int i = 0; i < receive.getLength(); i++)
+         //   System.out.println(receive.getData()[i]);
     /**
      *
      * @param domainAddress
@@ -76,14 +99,4 @@ public class Mydns {
         
         return byteOutputStream.toByteArray();
     }
-    ByteBuffer test;
-    public static byte[] decodeUDP(byte[] DNSMessage){
-        return null;
-    }
-    
-    public class DNSResponse{
-        private int AnswerCount;
-        private int AuthorityCount;
-        private int AdditianlCount;
-    } 
 }
