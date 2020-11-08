@@ -12,6 +12,21 @@ package mydns;
 public class RR {
     String ipAddress;
     String domain;
+    String name;
+
+    public RR(String ipAddress, String domain, String name) {
+        this.ipAddress = ipAddress;
+        this.domain = domain;
+        this.name = name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
@@ -29,8 +44,4 @@ public class RR {
         return domain;
     }
 
-    public RR(String serverName, String domain) {
-        this.ipAddress = serverName;
-        this.domain = domain;
-    }
 }
